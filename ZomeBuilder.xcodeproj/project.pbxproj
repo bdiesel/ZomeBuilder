@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D328AE722FA94B00000185E7 /* ZomeKit in Frameworks */ = {isa = PBXBuildFile; productRef = D328AE712FA94B00000185E7 /* ZomeKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		D328AE542FA82356000185E7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D328AE722FA94B00000185E7 /* ZomeKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = ZomeBuilder;
 			packageProductDependencies = (
+				D328AE712FA94B00000185E7 /* ZomeKit */,
 			);
 			productName = ZomeBuilder;
 			productReference = D328AE462FA82354000185E7 /* ZomeBuilder.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = D328AE3D2FA82354000185E7;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D328AE702FA949F5000185E7 /* XCLocalSwiftPackageReference "../swift-zomekit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D328AE472FA82354000185E7 /* Products */;
 			projectDirPath = "";
@@ -304,7 +313,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = MS29CLR63G;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -368,7 +376,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = MS29CLR63G;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -394,10 +401,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = MS29CLR63G;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -426,10 +433,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = MS29CLR63G;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -457,9 +464,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "-";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = MS29CLR63G;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.3;
 				MARKETING_VERSION = 1.0;
@@ -478,9 +485,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "-";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = MS29CLR63G;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.3;
 				MARKETING_VERSION = 1.0;
@@ -498,9 +505,9 @@
 		D328AE6E2FA82356000185E7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "-";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = MS29CLR63G;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.designcondition.ZomeBuilderUITests;
@@ -517,9 +524,9 @@
 		D328AE6F2FA82356000185E7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "-";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = MS29CLR63G;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.designcondition.ZomeBuilderUITests;
@@ -573,6 +580,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		D328AE702FA949F5000185E7 /* XCLocalSwiftPackageReference "../swift-zomekit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../swift-zomekit";
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D328AE712FA94B00000185E7 /* ZomeKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ZomeKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D328AE3E2FA82354000185E7 /* Project object */;
 }
