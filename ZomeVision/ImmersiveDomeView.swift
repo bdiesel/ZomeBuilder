@@ -7,30 +7,37 @@ import ZomeRendering
 /// ZomeKit values are inches by default; visionOS scenes are in metres,
 /// so the root entity gets `inchesToMeters` scale and is positioned a
 /// little ahead of the user — just outside the timbers — so they can
-/// physically step in.
+/// physically step in. Reads `params` from the shared `ZomeStore`, so
+/// in-situ slider tweaks rebuild the dome live around the user.
 struct ImmersiveDomeView: View {
-    let params: ZomeParameters
+    @Environment(ZomeStore.self) private var store
     let appearance: TimberAppearance
 
     private static let inchesToMeters: Float = 1.0 / 39.3701
 
     var body: some View {
         RealityView { content in
-            content.add(buildDome())
+            let dome = Entity()
+            dome.name = "dome"
+            dome.transform.scale = SIMD3<Float>(repeating: Self.inchesToMeters)
+            // Push the dome 1.5 m forward so the user starts outside the
+            // wedge and can step in. Floor stays at Y = 0.
+            dome.position = SIMD3<Float>(0, 0, -1.5)
+            populate(dome, with: store.params)
+            content.add(dome)
+        } update: { content in
+            // Live regen when params or appearance change. Camera-equivalent
+            // motion (the user walking) is purely a head-tracking concern,
+            // so update is only triggered by SwiftUI state changes.
+            if let dome = content.entities.first(where: { $0.name == "dome" }) {
+                populate(dome, with: store.params)
+            }
         }
     }
 
     @MainActor
-    private func buildDome() -> Entity {
-        let root = Entity()
-        root.name = "dome"
-        root.transform.scale = SIMD3<Float>(repeating: Self.inchesToMeters)
-
-        // Place the dome's ground plane (Y = 0 in zome coords) on the user's
-        // floor, with the apex straight up. Push it 1.5 m forward so the
-        // user starts outside the wedge and can step in.
-        root.position = SIMD3<Float>(0, 0, -1.5)
-
+    private func populate(_ root: Entity, with params: ZomeParameters) {
+        root.children.removeAll()
         let geom = Zome.build(params)
         for angle in geom.rotationAngles {
             let spiral = Entity()
@@ -47,6 +54,5 @@ struct ImmersiveDomeView: View {
             )
             root.addChild(spiral)
         }
-        return root
     }
 }
