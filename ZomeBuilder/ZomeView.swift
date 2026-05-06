@@ -1,6 +1,7 @@
 import SwiftUI
 import RealityKit
 import ZomeKit
+import ZomeRendering
 
 /// 3D viewport for the zome. Custom orbit camera (drag = rotate, scroll wheel = zoom).
 struct ZomeView: View {

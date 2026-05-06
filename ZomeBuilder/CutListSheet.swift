@@ -1,5 +1,6 @@
 import SwiftUI
 import ZomeKit
+import ZomeRendering
 
 /// Modal sheet showing the grouped cut list as a sortable table with an
 /// inline 3D-ish preview of each unique timber size. Length values follow

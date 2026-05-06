@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D328AE722FA94B00000185E7 /* ZomeKit in Frameworks */ = {isa = PBXBuildFile; productRef = D328AE712FA94B00000185E7 /* ZomeKit */; };
+		D328AE742FAA00000000185E7 /* ZomeRendering in Frameworks */ = {isa = PBXBuildFile; productRef = D328AE732FAA00000000185E7 /* ZomeRendering */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D328AE722FA94B00000185E7 /* ZomeKit in Frameworks */,
+				D328AE742FAA00000000185E7 /* ZomeRendering in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +120,7 @@
 			name = ZomeBuilder;
 			packageProductDependencies = (
 				D328AE712FA94B00000185E7 /* ZomeKit */,
+				D328AE732FAA00000000185E7 /* ZomeRendering */,
 			);
 			productName = ZomeBuilder;
 			productReference = D328AE462FA82354000185E7 /* ZomeBuilder.app */;
@@ -592,6 +595,10 @@
 		D328AE712FA94B00000185E7 /* ZomeKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ZomeKit;
+		};
+		D328AE732FAA00000000185E7 /* ZomeRendering */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ZomeRendering;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
