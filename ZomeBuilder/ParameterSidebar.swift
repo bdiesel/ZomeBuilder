@@ -13,6 +13,7 @@ struct ParameterSidebar: View {
     let onOpenDocument: () -> Void
     let onSaveDocument: () -> Void
     let onSaveAsDocument: () -> Void
+    let onFitToView: () -> Void
 
     @AppStorage(UnitSystem.storageKey) private var rawUnit: Int = UnitSystem.imperial.rawValue
     private var unitSystem: UnitSystem { UnitSystem(rawValue: rawUnit) ?? .imperial }
@@ -26,13 +27,14 @@ struct ParameterSidebar: View {
                 Button("Save As…",    action: onSaveAsDocument)
             }
 
-            Section("Display") {
+            Section("View") {
                 Picker("Units", selection: $rawUnit) {
                     ForEach(UnitSystem.allCases) { sys in
                         Text(sys.label).tag(sys.rawValue)
                     }
                 }
                 .pickerStyle(.segmented)
+                Button("Fit to view", action: onFitToView)
             }
 
             Section("Bounding box") {

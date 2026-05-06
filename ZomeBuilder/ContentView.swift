@@ -7,6 +7,12 @@ struct ContentView: View {
     @State private var showCutListSheet: Bool = false
     @State private var documentURL: URL? = nil
 
+    // Orbit camera state lives here so the axis gizmo and the 3D view
+    // both read from one source, and "Fit to view" can reset them.
+    @State private var cameraYaw: Float = 0.55
+    @State private var cameraPitch: Float = 0.32
+    @State private var cameraDistance: Float = 3.5
+
     private var geometry: ZomeGeometry { Zome.build(params) }
     private var cutListRows: [CutListEntry] {
         CutList.build(geometry: geometry, params: params)
@@ -48,17 +54,24 @@ struct ContentView: View {
                 onNewDocument: newDocument,
                 onOpenDocument: openDocument,
                 onSaveDocument: saveDocument,
-                onSaveAsDocument: saveAsDocument
+                onSaveAsDocument: saveAsDocument,
+                onFitToView: fitToView
             )
             .frame(width: 300)
 
             Divider()
 
-            ZomeView(params: params, showBoundingBox: showBoundingBox)
-                .overlay(alignment: .bottomLeading) {
-                    AxisGizmo()
-                        .padding(12)
-                }
+            ZomeView(
+                params: params,
+                showBoundingBox: showBoundingBox,
+                yaw: $cameraYaw,
+                pitch: $cameraPitch,
+                distance: $cameraDistance
+            )
+            .overlay(alignment: .bottomLeading) {
+                AxisGizmo(yaw: cameraYaw, pitch: cameraPitch)
+                    .padding(12)
+            }
         }
         .frame(minWidth: 900, minHeight: 600)
         .navigationTitle(documentTitle)
@@ -70,6 +83,18 @@ struct ContentView: View {
                 onExport: exportCutList
             )
         }
+    }
+
+    // MARK: - Camera
+
+    private func fitToView() {
+        cameraYaw = 0.55
+        cameraPitch = 0.32
+        // Frame the dome with margin: largest envelope dimension scaled to
+        // scene units, times a comfort factor for a 45° FOV.
+        let env = geometry.envelope
+        let largest = max(Float(env.height), Float(env.diameter)) * ZomeView.sceneScale
+        cameraDistance = max(0.6, largest * 1.6)
     }
 
     // MARK: - File actions

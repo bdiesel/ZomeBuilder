@@ -9,12 +9,15 @@ struct ZomeView: View {
 
     /// Scene-space scale: ZomeKit values are unitless (Brian's defaults are
     /// inches). 1/100 places the 122″ default zome at ~1.22 scene units.
-    private let scale: Float = 0.01
+    static let sceneScale: Float = 0.01
+    private var scale: Float { Self.sceneScale }
 
-    // Orbit camera state. Right-handed, Y-up; spherical coordinates around `target`.
-    @State private var yaw: Float = 0.55
-    @State private var pitch: Float = 0.32
-    @State private var distance: Float = 3.5
+    // Orbit camera state owned by ContentView so the axis gizmo and the
+    // 3D viewport share one source of truth (and a "fit to view" action
+    // can mutate them from outside).
+    @Binding var yaw: Float
+    @Binding var pitch: Float
+    @Binding var distance: Float
     @State private var dragStart: (yaw: Float, pitch: Float)? = nil
 
     /// Reference type held in `@State` so dome-rebuild gating survives across
