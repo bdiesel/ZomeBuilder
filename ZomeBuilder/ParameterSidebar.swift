@@ -5,6 +5,7 @@ import ZomeKit
 /// Skips bindu ratios and vanishingY — those are advanced inputs.
 struct ParameterSidebar: View {
     @Binding var params: ZomeParameters
+    @Binding var showBoundingBox: Bool
     let geometry: ZomeGeometry
 
     var body: some View {
@@ -13,6 +14,7 @@ struct ParameterSidebar: View {
                 EnvelopeReadout(geometry: geometry)
                     .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
                     .listRowBackground(Color.clear)
+                Toggle("Show in 3D view", isOn: $showBoundingBox)
             }
 
             Section("Geometry") {
