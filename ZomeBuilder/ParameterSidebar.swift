@@ -7,6 +7,8 @@ struct ParameterSidebar: View {
     @Binding var params: ZomeParameters
     @Binding var showBoundingBox: Bool
     let geometry: ZomeGeometry
+    let onShowCutList: () -> Void
+    let onExportCutList: () -> Void
 
     var body: some View {
         Form {
@@ -15,6 +17,11 @@ struct ParameterSidebar: View {
                     .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
                     .listRowBackground(Color.clear)
                 Toggle("Show in 3D view", isOn: $showBoundingBox)
+            }
+
+            Section("Cut list") {
+                Button("View cut list…", action: onShowCutList)
+                Button("Export CSV…", action: onExportCutList)
             }
 
             Section("Geometry") {
