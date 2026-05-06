@@ -2,14 +2,17 @@ import SwiftUI
 import ZomeKit
 
 /// Modal sheet showing the grouped cut list as a sortable table with an
-/// inline 3D-ish preview of each unique timber size.
+/// inline 3D-ish preview of each unique timber size. Length values follow
+/// the active `UnitSystem`.
 struct CutListSheet: View {
     let rows: [CutListEntry]
     /// One representative ZomeTimber per cut-list row, keyed by `entry.label`.
-    /// Used for the inline TimberSketch preview.
     let representatives: [String: ZomeTimber]
     @Binding var isPresented: Bool
     let onExport: () -> Void
+
+    @AppStorage(UnitSystem.storageKey) private var rawUnit: Int = UnitSystem.imperial.rawValue
+    private var unitSystem: UnitSystem { UnitSystem(rawValue: rawUnit) ?? .imperial }
 
     private var maxLength: Double {
         rows.map(\.length).max() ?? 1
@@ -47,15 +50,15 @@ struct CutListSheet: View {
                 }
                 .width(min: 40, ideal: 48)
                 TableColumn("Length") { row in
-                    Text(CutList.formatInches(row.length)).monospacedDigit()
+                    Text(unitSystem.formatLength(inches: row.length)).monospacedDigit()
                 }
                 .width(min: 90, ideal: 110)
                 TableColumn("Width") { row in
-                    Text(CutList.formatInches(row.width)).monospacedDigit()
+                    Text(unitSystem.formatLength(inches: row.width)).monospacedDigit()
                 }
                 .width(min: 70, ideal: 80)
                 TableColumn("Thickness") { row in
-                    Text(CutList.formatInches(row.thickness)).monospacedDigit()
+                    Text(unitSystem.formatLength(inches: row.thickness)).monospacedDigit()
                 }
                 .width(min: 80, ideal: 90)
                 TableColumn("Cut A") { row in
@@ -88,6 +91,6 @@ struct CutListSheet: View {
 
     private var summary: String {
         let totals = CutList.totals(rows)
-        return "\(rows.count) sizes · \(totals.pieceCount) pieces · \(CutList.formatInches(totals.linearUnits)) total"
+        return "\(rows.count) sizes · \(totals.pieceCount) pieces · \(unitSystem.formatLength(inches: totals.linearUnits)) total"
     }
 }

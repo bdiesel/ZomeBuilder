@@ -14,6 +14,9 @@ struct ParameterSidebar: View {
     let onSaveDocument: () -> Void
     let onSaveAsDocument: () -> Void
 
+    @AppStorage(UnitSystem.storageKey) private var rawUnit: Int = UnitSystem.imperial.rawValue
+    private var unitSystem: UnitSystem { UnitSystem(rawValue: rawUnit) ?? .imperial }
+
     var body: some View {
         Form {
             Section("File") {
@@ -21,6 +24,15 @@ struct ParameterSidebar: View {
                 Button("Open…",       action: onOpenDocument)
                 Button("Save",        action: onSaveDocument)
                 Button("Save As…",    action: onSaveAsDocument)
+            }
+
+            Section("Display") {
+                Picker("Units", selection: $rawUnit) {
+                    ForEach(UnitSystem.allCases) { sys in
+                        Text(sys.label).tag(sys.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
             }
 
             Section("Bounding box") {
@@ -49,12 +61,12 @@ struct ParameterSidebar: View {
                 sliderRow("θ (deg)", value: $params.thetaDegrees, range: 30...75, step: 0.25, format: "%.2f")
                 sliderRow("Kite ratio", value: $params.kiteRatio, range: 0.4...1.6, step: 0.01, format: "%.2f")
                 sliderRow("Height ratio", value: $params.heightRatio, range: 0.30...0.95, step: 0.01, format: "%.2f")
-                sliderRow("Zome height", value: $params.zomeHeight, range: 36...360, step: 1, format: "%.0f")
+                lengthRow("Zome height", inches: $params.zomeHeight, inchRange: 36...360)
             }
 
             Section("Timbers") {
-                sliderRow("Width", value: $params.timberWidth, range: 0.5...12, step: 0.25, format: "%.2f")
-                sliderRow("Thickness", value: $params.timberThickness, range: 0.5...4, step: 0.125, format: "%.3f")
+                lengthRow("Width", inches: $params.timberWidth, inchRange: 0.5...12)
+                lengthRow("Thickness", inches: $params.timberThickness, inchRange: 0.5...4)
             }
 
             Section {
@@ -63,6 +75,27 @@ struct ParameterSidebar: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    /// Slider row for a length — stored in inches internally, formatted in the
+    /// active unit system, with step matching that unit's natural snap (1/16″
+    /// or 1 mm).
+    @ViewBuilder
+    private func lengthRow(
+        _ label: String,
+        inches: Binding<Double>,
+        inchRange: ClosedRange<Double>
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(label)
+                Spacer()
+                Text(unitSystem.formatLength(inches: inches.wrappedValue))
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+            }
+            Slider(value: inches, in: inchRange, step: unitSystem.lengthStepInches)
+        }
     }
 
     @ViewBuilder
