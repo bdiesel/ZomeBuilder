@@ -16,6 +16,11 @@ struct ZomeView: View {
     @State private var distance: Float = 3.5
     @State private var dragStart: (yaw: Float, pitch: Float)? = nil
 
+    /// Reference type held in `@State` so dome-rebuild gating survives across
+    /// body re-evaluations without triggering further re-evaluations on mutation.
+    /// Otherwise every drag/zoom tick would rebuild all 270 timber entities.
+    @State private var cache = BuildCache()
+
     private let target: SIMD3<Float> = SIMD3<Float>(0, 0.5, 0)
 
     var body: some View {
@@ -48,12 +53,16 @@ struct ZomeView: View {
             content.add(dome)
 
             populate(dome, with: params)
-            if let cam = content.entities.first(where: { $0.name == "camera" }) {
-                cam.look(at: target, from: cameraPosition(), relativeTo: nil)
-            }
+            cache.lastBuiltParams = params
+            camera.look(at: target, from: cameraPosition(), relativeTo: nil)
         } update: { content in
-            if let dome = content.entities.first(where: { $0.name == "dome" }) {
+            // Rebuild the dome only when `params` actually change. Camera-state
+            // changes (yaw/pitch/distance) hit this same closure on every tick,
+            // and rebuilding 270 entities at 60Hz was the source of the lag.
+            if cache.lastBuiltParams != params,
+               let dome = content.entities.first(where: { $0.name == "dome" }) {
                 populate(dome, with: params)
+                cache.lastBuiltParams = params
             }
             if let cam = content.entities.first(where: { $0.name == "camera" }) {
                 cam.look(at: target, from: cameraPosition(), relativeTo: nil)
@@ -116,11 +125,28 @@ struct ZomeView: View {
         for timbers in geom.faceTimbers {
             for timber in timbers {
                 guard let mesh = try? timber.meshResource(scale: scale) else { continue }
-                let color = RainbowPalette.color(for: timber)
-                let material = SimpleMaterial(color: color, roughness: 0.6, isMetallic: false)
+                let material = doubleSidedMaterial(color: RainbowPalette.color(for: timber))
                 wedge.addChild(ModelEntity(mesh: mesh, materials: [material]))
             }
         }
         return wedge
     }
+
+    /// Double-sided so the dome reads cleanly from inside (visionOS walk-through)
+    /// AND from outside the wedge during orbit. PhysicallyBasedMaterial is the
+    /// only built-in that exposes face culling.
+    private func doubleSidedMaterial(color: PlatformColor) -> PhysicallyBasedMaterial {
+        var pbr = PhysicallyBasedMaterial()
+        pbr.baseColor = .init(tint: color)
+        pbr.roughness = .init(floatLiteral: 0.6)
+        pbr.metallic = .init(floatLiteral: 0.0)
+        pbr.faceCulling = .none
+        return pbr
+    }
+}
+
+/// Mutable holder for build-result caching. Class so mutations don't
+/// trigger SwiftUI body re-evaluations the way a struct `@State` would.
+private final class BuildCache {
+    var lastBuiltParams: ZomeParameters?
 }
