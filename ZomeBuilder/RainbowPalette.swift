@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import ZomeKit
 
 #if canImport(AppKit)
@@ -10,16 +11,27 @@ typealias PlatformColor = UIColor
 #endif
 
 /// Per-timber rainbow coloring. Same timbers (same length within 1/16″ at the
-/// chosen unit scale) get the same color, so cut-list groupings read at a glance.
-/// Matches the z5omes 3D-viewport look.
+/// chosen unit scale) get the same color, so cut-list groupings read at a
+/// glance. Matches the z5omes 3D-viewport look.
 enum RainbowPalette {
     static func color(for timber: ZomeTimber) -> PlatformColor {
-        let m = CutList.measure(timber)
-        // Bucket by length only (in sixteenths of whatever unit ZomeKit was
-        // given). Miter angles carry less visual signal for the rainbow.
-        let bucket = Int((m.length * 16).rounded())
-        let hue = CGFloat(stableHash(bucket) % 360) / 360.0
-        return PlatformColor(hue: hue, saturation: 0.65, brightness: 0.78, alpha: 1.0)
+        color(forLength: CutList.measure(timber).length)
+    }
+
+    /// Direct length-keyed entry point — handy for code paths (cut-list
+    /// previews) that have a `CutListEntry` but not a full ZomeTimber.
+    static func color(forLength length: Double) -> PlatformColor {
+        let h = hue(forLength: length)
+        return PlatformColor(hue: CGFloat(h), saturation: 0.65, brightness: 0.78, alpha: 1.0)
+    }
+
+    static func swiftUIColor(forLength length: Double) -> Color {
+        Color(hue: hue(forLength: length), saturation: 0.65, brightness: 0.78)
+    }
+
+    private static func hue(forLength length: Double) -> Double {
+        let bucket = Int((length * 16).rounded())
+        return Double(stableHash(bucket) % 360) / 360.0
     }
 
     /// Stable across runs. `Int.hashValue` is randomised per process; this is not.

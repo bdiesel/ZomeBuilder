@@ -1,12 +1,19 @@
 import SwiftUI
 import ZomeKit
 
-/// Modal sheet showing the grouped cut list as a sortable table.
-/// "Done" closes; "Export CSV…" delegates back to the host via `onExport`.
+/// Modal sheet showing the grouped cut list as a sortable table with an
+/// inline 3D-ish preview of each unique timber size.
 struct CutListSheet: View {
     let rows: [CutListEntry]
+    /// One representative ZomeTimber per cut-list row, keyed by `entry.label`.
+    /// Used for the inline TimberSketch preview.
+    let representatives: [String: ZomeTimber]
     @Binding var isPresented: Bool
     let onExport: () -> Void
+
+    private var maxLength: Double {
+        rows.map(\.length).max() ?? 1
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,6 +34,14 @@ struct CutListSheet: View {
             Table(rows) {
                 TableColumn("Label", value: \.label)
                     .width(min: 48, ideal: 56)
+                TableColumn("Shape") { row in
+                    if let timber = representatives[row.label] {
+                        TimberSketch(timber: timber, lengthHint: row.length, maxLength: maxLength)
+                    } else {
+                        Color.clear
+                    }
+                }
+                .width(min: 140, ideal: 180)
                 TableColumn("Qty") { row in
                     Text("\(row.quantity)").monospacedDigit()
                 }
@@ -68,7 +83,7 @@ struct CutListSheet: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
         }
-        .frame(minWidth: 760, idealWidth: 860, minHeight: 460, idealHeight: 540)
+        .frame(minWidth: 860, idealWidth: 960, minHeight: 480, idealHeight: 560)
     }
 
     private var summary: String {
