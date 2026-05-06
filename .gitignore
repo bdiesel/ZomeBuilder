@@ -1,0 +1,11 @@
+.DS_Store
+.build/
+.swiftpm/
+xcuserdata/
+DerivedData/
+*.xcuserstate
+.netrc
+Package.resolved
+
+# Claude Code per-project state
+.claude/settings.local.json
