@@ -1,11 +1,17 @@
 import SwiftUI
 import ZomeKit
+import ZomeRendering
 
 struct ContentView: View {
     @State private var params: ZomeParameters = .goodKarmaDefault
     @State private var showBoundingBox: Bool = false
     @State private var showCutListSheet: Bool = false
     @State private var documentURL: URL? = nil
+
+    @AppStorage("timberAppearance") private var rawAppearance: String = TimberAppearance.rainbow.rawValue
+    private var appearance: TimberAppearance {
+        TimberAppearance(rawValue: rawAppearance) ?? .rainbow
+    }
 
     // Orbit camera state lives here so the axis gizmo and the 3D view
     // both read from one source, and "Fit to view" can reset them.
@@ -64,6 +70,7 @@ struct ContentView: View {
             ZomeView(
                 params: params,
                 showBoundingBox: showBoundingBox,
+                appearance: appearance,
                 yaw: $cameraYaw,
                 pitch: $cameraPitch,
                 distance: $cameraDistance

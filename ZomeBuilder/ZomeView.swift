@@ -7,6 +7,7 @@ import ZomeRendering
 struct ZomeView: View {
     let params: ZomeParameters
     let showBoundingBox: Bool
+    let appearance: TimberAppearance
 
     /// Scene-space scale: ZomeKit values are unitless (Brian's defaults are
     /// inches). 1/100 places the 122″ default zome at ~1.22 scene units.
@@ -64,11 +65,16 @@ struct ZomeView: View {
             EnvelopeBox.populate(envelope, envelope: geom.envelope, scale: scale)
             envelope.isEnabled = showBoundingBox
             cache.lastBuiltParams = params
+            cache.lastBuiltAppearance = appearance
 
             camera.look(at: target, from: cameraPosition(), relativeTo: nil)
         } update: { content in
-            // Rebuild dome + envelope box only when params actually change.
-            if cache.lastBuiltParams != params {
+            // Rebuild dome + envelope box when params OR appearance change.
+            // Camera-state changes (yaw/pitch/distance) hit this same closure
+            // every tick, so the cache check is what keeps interaction smooth.
+            let needsRebuild = cache.lastBuiltParams != params
+                || cache.lastBuiltAppearance != appearance
+            if needsRebuild {
                 let geom = Zome.build(params)
                 if let dome = content.entities.first(where: { $0.name == "dome" }) {
                     populate(dome, with: geom)
@@ -77,6 +83,7 @@ struct ZomeView: View {
                     EnvelopeBox.populate(box, envelope: geom.envelope, scale: scale)
                 }
                 cache.lastBuiltParams = params
+                cache.lastBuiltAppearance = appearance
             }
             // Toggle visibility (cheap; no rebuild).
             if let box = content.entities.first(where: { $0.name == "envelopeBox" }) {
@@ -142,23 +149,11 @@ struct ZomeView: View {
         for timbers in geom.faceTimbers {
             for timber in timbers {
                 guard let mesh = try? timber.meshResource(scale: scale) else { continue }
-                let material = doubleSidedMaterial(color: RainbowPalette.color(for: timber))
+                let material = TimberMaterials.material(for: timber, appearance: appearance)
                 wedge.addChild(ModelEntity(mesh: mesh, materials: [material]))
             }
         }
         return wedge
-    }
-
-    /// Double-sided so the dome reads cleanly from inside (visionOS walk-through)
-    /// AND from outside the wedge during orbit. PhysicallyBasedMaterial is the
-    /// only built-in that exposes face culling.
-    private func doubleSidedMaterial(color: PlatformColor) -> PhysicallyBasedMaterial {
-        var pbr = PhysicallyBasedMaterial()
-        pbr.baseColor = .init(tint: color)
-        pbr.roughness = .init(floatLiteral: 0.6)
-        pbr.metallic = .init(floatLiteral: 0.0)
-        pbr.faceCulling = .none
-        return pbr
     }
 }
 
@@ -166,4 +161,5 @@ struct ZomeView: View {
 /// trigger SwiftUI body re-evaluations the way a struct `@State` would.
 private final class BuildCache {
     var lastBuiltParams: ZomeParameters?
+    var lastBuiltAppearance: TimberAppearance?
 }

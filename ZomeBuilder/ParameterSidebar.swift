@@ -1,5 +1,6 @@
 import SwiftUI
 import ZomeKit
+import ZomeRendering
 
 /// Sliders + readouts for the live-tunable subset of `ZomeParameters`.
 /// Skips bindu ratios and vanishingY — those are advanced inputs.
@@ -18,6 +19,8 @@ struct ParameterSidebar: View {
     @AppStorage(UnitSystem.storageKey) private var rawUnit: Int = UnitSystem.imperial.rawValue
     private var unitSystem: UnitSystem { UnitSystem(rawValue: rawUnit) ?? .imperial }
 
+    @AppStorage("timberAppearance") private var rawAppearance: String = TimberAppearance.rainbow.rawValue
+
     var body: some View {
         Form {
             Section("File") {
@@ -34,6 +37,14 @@ struct ParameterSidebar: View {
                     }
                 }
                 .pickerStyle(.segmented)
+
+                Picker("Timbers", selection: $rawAppearance) {
+                    ForEach(TimberAppearance.allCases) { ap in
+                        Text(ap.label).tag(ap.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+
                 Button("Fit to view", action: onFitToView)
             }
 
