@@ -9,9 +9,20 @@ struct ParameterSidebar: View {
     let geometry: ZomeGeometry
     let onShowCutList: () -> Void
     let onExportCutList: () -> Void
+    let onNewDocument: () -> Void
+    let onOpenDocument: () -> Void
+    let onSaveDocument: () -> Void
+    let onSaveAsDocument: () -> Void
 
     var body: some View {
         Form {
+            Section("File") {
+                Button("New",         action: onNewDocument)
+                Button("Open…",       action: onOpenDocument)
+                Button("Save",        action: onSaveDocument)
+                Button("Save As…",    action: onSaveAsDocument)
+            }
+
             Section("Bounding box") {
                 EnvelopeReadout(geometry: geometry)
                     .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))

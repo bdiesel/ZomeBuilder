@@ -5,6 +5,7 @@ struct ContentView: View {
     @State private var params: ZomeParameters = .goodKarmaDefault
     @State private var showBoundingBox: Bool = false
     @State private var showCutListSheet: Bool = false
+    @State private var documentURL: URL? = nil
 
     private var geometry: ZomeGeometry { Zome.build(params) }
     private var cutListRows: [CutListEntry] {
@@ -16,7 +17,6 @@ struct ContentView: View {
     private var representativeTimbers: [String: ZomeTimber] {
         var byEntry: [String: ZomeTimber] = [:]
         let rows = cutListRows
-        // Snapshot threshold values once.
         for timbers in geometry.faceTimbers {
             for timber in timbers {
                 let m = CutList.measure(timber)
@@ -33,6 +33,10 @@ struct ContentView: View {
         return byEntry
     }
 
+    private var documentTitle: String {
+        documentURL?.deletingPathExtension().lastPathComponent ?? "Untitled"
+    }
+
     var body: some View {
         HStack(spacing: 0) {
             ParameterSidebar(
@@ -40,7 +44,11 @@ struct ContentView: View {
                 showBoundingBox: $showBoundingBox,
                 geometry: geometry,
                 onShowCutList: { showCutListSheet = true },
-                onExportCutList: exportCutList
+                onExportCutList: exportCutList,
+                onNewDocument: newDocument,
+                onOpenDocument: openDocument,
+                onSaveDocument: saveDocument,
+                onSaveAsDocument: saveAsDocument
             )
             .frame(width: 300)
 
@@ -53,6 +61,7 @@ struct ContentView: View {
                 }
         }
         .frame(minWidth: 900, minHeight: 600)
+        .navigationTitle(documentTitle)
         .sheet(isPresented: $showCutListSheet) {
             CutListSheet(
                 rows: cutListRows,
@@ -62,6 +71,44 @@ struct ContentView: View {
             )
         }
     }
+
+    // MARK: - File actions
+
+    private func newDocument() {
+        params = .goodKarmaDefault
+        documentURL = nil
+    }
+
+    private func openDocument() {
+        #if canImport(AppKit)
+        if let result = DocumentManager.open() {
+            params = result.params
+            documentURL = result.url
+        }
+        #endif
+    }
+
+    private func saveDocument() {
+        #if canImport(AppKit)
+        if let url = documentURL {
+            DocumentManager.save(params, to: url)
+        } else {
+            saveAsDocument()
+        }
+        #endif
+    }
+
+    private func saveAsDocument() {
+        #if canImport(AppKit)
+        let suggested = documentURL?.lastPathComponent
+            ?? "\(documentTitle).\(DocumentManager.defaultExtension)"
+        if let url = DocumentManager.saveAs(params, suggestedName: suggested) {
+            documentURL = url
+        }
+        #endif
+    }
+
+    // MARK: - Cut list export
 
     private func exportCutList() {
         #if canImport(AppKit)
