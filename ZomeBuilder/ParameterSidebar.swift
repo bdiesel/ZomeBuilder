@@ -5,9 +5,16 @@ import ZomeKit
 /// Skips bindu ratios and vanishingY — those are advanced inputs.
 struct ParameterSidebar: View {
     @Binding var params: ZomeParameters
+    let geometry: ZomeGeometry
 
     var body: some View {
         Form {
+            Section("Bounding box") {
+                EnvelopeReadout(geometry: geometry)
+                    .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+                    .listRowBackground(Color.clear)
+            }
+
             Section("Geometry") {
                 stepperRow(
                     "Spirals (N)",
