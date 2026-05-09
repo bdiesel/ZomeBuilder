@@ -66,5 +66,16 @@ struct ImmersiveDomeView: View {
             )
             root.addChild(spiral)
         }
+
+        // Floor slab — one mesh under the whole dome, not per-spiral.
+        let polygon = Zome.floorPolygon(for: geom, params: params)
+        if let floorMesh = FloorMesh.generate(polygon: polygon, scale: 1.0) {
+            var pbr = PhysicallyBasedMaterial()
+            pbr.baseColor = .init(tint: PlatformColor(red: 0.32, green: 0.24, blue: 0.18, alpha: 1.0))
+            pbr.roughness = .init(floatLiteral: 0.85)
+            pbr.metallic = .init(floatLiteral: 0.0)
+            pbr.faceCulling = .none
+            root.addChild(ModelEntity(mesh: floorMesh, materials: [pbr]))
+        }
     }
 }
