@@ -13,9 +13,11 @@ struct AxisGizmo: View {
     let yaw: Float
     let pitch: Float
 
+    // SketchUp parity: red = horizontal (X), blue = up (Y), green = forward (Z).
+    // The math is still RealityKit's Y-up — only the visible colours are remapped.
     private static let xColor = Color(red: 0.85, green: 0.20, blue: 0.20)
-    private static let yColor = Color(red: 0.20, green: 0.70, blue: 0.25)
-    private static let zColor = Color(red: 0.20, green: 0.40, blue: 0.95)
+    private static let yColor = Color(red: 0.20, green: 0.40, blue: 0.95)
+    private static let zColor = Color(red: 0.20, green: 0.70, blue: 0.25)
 
     var body: some View {
         ZStack {

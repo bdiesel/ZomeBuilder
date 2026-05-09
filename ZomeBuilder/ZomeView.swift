@@ -135,11 +135,12 @@ struct ZomeView: View {
     private func populate(_ root: Entity, with geom: ZomeGeometry) {
         root.children.removeAll()
 
-        // Lift the dome so the bottom of the footing prisms (which extend
-        // `timberThickness` below the original Y=0) sits on the grid plane
-        // instead of poking through it. Net effect: floor at Y=0, footings
-        // 0..thickness, timbers from thickness up.
-        root.position.y = Float(geom.parameters.timberThickness) * scale
+        // CAD convention: timber bottoms sit on the grid plane (Y=0). The
+        // footing prisms and floor slab extend BELOW Y=0 — visible through
+        // the grid lines from oblique angles, partially hidden from above.
+        // (visionOS lifts the dome instead, so the footings rest on the
+        // user's real floor — see ImmersiveDomeView.)
+        root.position.y = 0
 
         let footings = Zome.footings(for: geom, params: geom.parameters)
 
