@@ -19,6 +19,10 @@ struct LauncherView: View {
     @State private var showFileImporter: Bool = false
     @State private var loadError: String? = nil
 
+    /// Security-scoped bookmark for the most recently opened `.zome` file.
+    /// Empty `Data` means no document loaded — show the GoodKarma default.
+    @AppStorage("lastDocumentBookmark") private var bookmarkData: Data = Data()
+
     private var geometry: ZomeGeometry { Zome.build(store.params) }
 
     var body: some View {
@@ -56,11 +60,8 @@ struct LauncherView: View {
                     Button("Open Design…") { showFileImporter = true }
                         .frame(maxWidth: .infinity)
                     if store.documentName != nil {
-                        Button("Reset", role: .destructive) {
-                            store.params = .goodKarmaDefault
-                            store.documentName = nil
-                        }
-                        .frame(maxWidth: .infinity)
+                        Button("Reset", role: .destructive, action: resetToDefault)
+                            .frame(maxWidth: .infinity)
                     }
                 }
                 .controlSize(.regular)
@@ -89,6 +90,7 @@ struct LauncherView: View {
                 loadError = "Couldn't open: \(error.localizedDescription)"
             }
         }
+        .onAppear { restoreLastDocument() }
     }
 
     private func row(_ label: String, value: String) -> some View {
@@ -122,7 +124,7 @@ struct LauncherView: View {
         }
     }
 
-    private func loadDesign(from url: URL) {
+    private func loadDesign(from url: URL, persistBookmark: Bool = true) {
         let needsAccess = url.startAccessingSecurityScopedResource()
         defer { if needsAccess { url.stopAccessingSecurityScopedResource() } }
 
@@ -132,8 +134,56 @@ struct LauncherView: View {
             store.params = loaded
             store.documentName = url.deletingPathExtension().lastPathComponent
             loadError = nil
+
+            // Stash a bookmark so we can re-open this file on next launch
+            // without requiring the user to re-pick it. visionOS bookmarks
+            // are plain (no .withSecurityScope — that's a macOS-only flag);
+            // sandbox access is mediated through the original file picker
+            // grant, which the bookmark preserves.
+            if persistBookmark,
+               let bookmark = try? url.bookmarkData(
+                   options: [],
+                   includingResourceValuesForKeys: nil,
+                   relativeTo: nil
+               )
+            {
+                bookmarkData = bookmark
+            }
         } catch {
             loadError = "Not a valid zome file: \(error.localizedDescription)"
         }
+    }
+
+    /// Resolve the saved bookmark on launch and reload the document. If the
+    /// bookmark is stale (file moved / deleted) we silently clear it and
+    /// fall back to the default zome.
+    private func restoreLastDocument() {
+        guard !bookmarkData.isEmpty else { return }
+
+        var stale = false
+        guard let url = try? URL(
+            resolvingBookmarkData: bookmarkData,
+            options: [],
+            relativeTo: nil,
+            bookmarkDataIsStale: &stale
+        ) else {
+            bookmarkData = Data()
+            return
+        }
+        if stale {
+            bookmarkData = Data()
+            return
+        }
+        // Don't re-persist on restore — the bookmark we have is already
+        // current; saving again would just churn UserDefaults.
+        loadDesign(from: url, persistBookmark: false)
+    }
+
+    /// Called from the Reset button to revert to the default and forget
+    /// the saved bookmark so the next launch starts from the default again.
+    func resetToDefault() {
+        store.params = .goodKarmaDefault
+        store.documentName = nil
+        bookmarkData = Data()
     }
 }
