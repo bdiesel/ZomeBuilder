@@ -34,6 +34,19 @@ struct ImmersiveControlsView: View {
                 .pickerStyle(.segmented)
             }
 
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Assembly")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Picker("Assembly", selection: $store.params.assemblyMethod) {
+                    ForEach(AssemblyMethod.allCases) { m in
+                        Text(m.label).tag(m)
+                    }
+                }
+                .labelsHidden()
+                .pickerStyle(.segmented)
+            }
+
             Divider()
 
             sliderRow(

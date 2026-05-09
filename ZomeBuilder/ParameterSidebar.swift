@@ -61,6 +61,13 @@ struct ParameterSidebar: View {
             }
 
             Section("Geometry") {
+                Picker("Assembly", selection: $params.assemblyMethod) {
+                    ForEach(AssemblyMethod.allCases) { m in
+                        Text(m.label).tag(m)
+                    }
+                }
+                .pickerStyle(.segmented)
+
                 stepperRow(
                     "Spirals (N)",
                     value: Binding(
