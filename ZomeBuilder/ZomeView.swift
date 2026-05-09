@@ -134,8 +134,17 @@ struct ZomeView: View {
 
     private func populate(_ root: Entity, with geom: ZomeGeometry) {
         root.children.removeAll()
+
+        // Lift the dome so the bottom of the footing prisms (which extend
+        // `timberThickness` below the original Y=0) sits on the grid plane
+        // instead of poking through it. Net effect: floor at Y=0, footings
+        // 0..thickness, timbers from thickness up.
+        root.position.y = Float(geom.parameters.timberThickness) * scale
+
+        let footings = Zome.footings(for: geom, params: geom.parameters)
+
         for angle in geom.rotationAngles {
-            let spiral = makeSpiral(geom)
+            let spiral = makeSpiral(geom, footings: footings)
             spiral.transform.rotation = simd_quatf(
                 angle: -Float(angle),
                 axis: SIMD3<Float>(0, 1, 0)
@@ -144,7 +153,7 @@ struct ZomeView: View {
         }
     }
 
-    private func makeSpiral(_ geom: ZomeGeometry) -> Entity {
+    private func makeSpiral(_ geom: ZomeGeometry, footings: [ZomeTimber]) -> Entity {
         let wedge = Entity()
         for timbers in geom.faceTimbers {
             for timber in timbers {
@@ -152,6 +161,11 @@ struct ZomeView: View {
                 let material = TimberMaterials.material(for: timber, appearance: appearance)
                 wedge.addChild(ModelEntity(mesh: mesh, materials: [material]))
             }
+        }
+        for footing in footings {
+            guard let mesh = try? footing.meshResource(scale: scale) else { continue }
+            let material = TimberMaterials.material(for: footing, appearance: appearance)
+            wedge.addChild(ModelEntity(mesh: mesh, materials: [material]))
         }
         return wedge
     }

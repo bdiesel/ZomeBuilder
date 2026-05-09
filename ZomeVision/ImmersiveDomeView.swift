@@ -20,9 +20,6 @@ struct ImmersiveDomeView: View {
             let dome = Entity()
             dome.name = "dome"
             dome.transform.scale = SIMD3<Float>(repeating: Self.inchesToMeters)
-            // Push the dome 1.5 m forward so the user starts outside the
-            // wedge and can step in. Floor stays at Y = 0.
-            dome.position = SIMD3<Float>(0, 0, -1.5)
             populate(dome, with: store.params)
             content.add(dome)
         } update: { content in
@@ -39,6 +36,16 @@ struct ImmersiveDomeView: View {
     private func populate(_ root: Entity, with params: ZomeParameters) {
         root.children.removeAll()
         let geom = Zome.build(params)
+        let footings = Zome.footings(for: geom, params: params)
+
+        // Position the dome so the floor (bottom of footings) sits on the
+        // user's real floor, with the apex straight up. Push 1.5 m forward
+        // so the user starts outside and can step in.
+        // Lift = timberThickness in scene meters, since the dome's internal
+        // Y origin is at the timber-floor level (not the footing-floor).
+        let lift = Float(params.timberThickness) * Self.inchesToMeters
+        root.position = SIMD3<Float>(0, lift, -1.5)
+
         for angle in geom.rotationAngles {
             let spiral = Entity()
             for timbers in geom.faceTimbers {
@@ -47,6 +54,11 @@ struct ImmersiveDomeView: View {
                     let material = TimberMaterials.material(for: timber, appearance: appearance)
                     spiral.addChild(ModelEntity(mesh: mesh, materials: [material]))
                 }
+            }
+            for footing in footings {
+                guard let mesh = try? footing.meshResource(scale: 1.0) else { continue }
+                let material = TimberMaterials.material(for: footing, appearance: appearance)
+                spiral.addChild(ModelEntity(mesh: mesh, materials: [material]))
             }
             spiral.transform.rotation = simd_quatf(
                 angle: -Float(angle),
