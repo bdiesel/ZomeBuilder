@@ -153,21 +153,10 @@ struct ZomeView: View {
             root.addChild(spiral)
         }
 
-        // Floor slab — single mesh under the whole dome, NOT per-spiral.
-        if let floor = makeFloor(for: geom) {
-            root.addChild(floor)
-        }
-    }
-
-    private func makeFloor(for geom: ZomeGeometry) -> Entity? {
-        let polygon = Zome.floorPolygon(for: geom, params: geom.parameters)
-        guard let mesh = FloorMesh.generate(polygon: polygon, scale: scale) else { return nil }
-        var pbr = PhysicallyBasedMaterial()
-        pbr.baseColor = .init(tint: PlatformColor(red: 0.32, green: 0.24, blue: 0.18, alpha: 1.0))
-        pbr.roughness = .init(floatLiteral: 0.85)
-        pbr.metallic = .init(floatLiteral: 0.0)
-        pbr.faceCulling = .none
-        return ModelEntity(mesh: mesh, materials: [pbr])
+        // (Floor slab intentionally skipped on Mac — the grid plane reads
+        // as "ground" in the design view; rendering a separate slab under
+        // the dome reads as visually elevated. visionOS still draws it
+        // because there the slab is the user's real-floor anchor.)
     }
 
     private func makeSpiral(_ geom: ZomeGeometry, footings: [ZomeTimber]) -> Entity {
